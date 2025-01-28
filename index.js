@@ -273,6 +273,35 @@ async function run() {
             res.send(result)
         })
 
+        // DONAR API
+        app.post('/donar', verifyToken, async (req, res) => {
+            const donationInfo = req.body
+            const result = await DonarsCollections.insertOne(donationInfo)
+            res.send(result)
+        })
+
+        app.get('/donar', verifyToken, async (req, res) => {
+            const email = req.query.email;
+            if (email) {
+                const query = { DonorEmail: email }
+                const cursor = await DonarsCollections.find(query).sort({ respondedAt: 1 }).limit(3)
+                const result = await cursor.toArray()
+                if (result) {
+                    res.send(result);
+                }
+                else {
+                    res.status(404).send({ message: "Request not found" })
+                }
+            }
+            else {
+                const result = await DonarsCollections.find().toArray()
+                res.send(result)
+            }
+        })
+ 
+
+ 
+
 
 
     } finally {
