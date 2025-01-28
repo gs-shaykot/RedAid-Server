@@ -117,6 +117,29 @@ async function run() {
             }
         })
 
+        app.get('/users/filter', verifyToken, async (req, res) => {
+            const email = req.query.email
+            const user = await usersCollections.findOne({ email: email })
+            if (user) {
+                res.send(user)
+            }
+            else {
+                res.status(404).send({ message: "User not found" })
+            }
+        })
+
+        app.get('/users/search', async (req, res) => {
+            const { blood, District, Upazila } = req.query;
+            const query = {
+                ...(blood && { blood }),
+                ...(District && { District }),
+                ...(Upazila && { Upazila }),
+            };
+            console.log(blood, " ", District, " ", Upazila)
+            const result = await usersCollections.find(query).toArray();
+            res.send(result);
+        });
+
 
 
     } finally {
