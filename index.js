@@ -300,7 +300,106 @@ async function run() {
         })
  
 
- 
+        app.patch('/donar/:id', verifyToken, async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true }
+            const updateDoc = {
+                $set: req.body
+            }
+            const result = await DonarsCollections.updateOne(filter, updateDoc, options)
+            res.send(result)
+        })
+
+        app.delete('/donar/:id', verifyToken, async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) };
+            const result = await DonarsCollections.deleteOne(filter)
+            res.send(result)
+        })
+
+        // BLOG API
+
+        app.post('/blogs', async (req, res) => {
+            const blog = req.body
+            const result = await BlogsCollections.insertOne(blog)
+            res.send(result)
+        })
+
+        app.get('/blogs', async (req, res) => {
+            const page = parseInt(req.query.page)
+            const size = parseInt(req.query.size)
+            const blogCount = await BlogsCollections.countDocuments()
+            const result = await BlogsCollections.find().skip(page * size).limit(size).toArray()
+            res.send({ result, blogCount })
+        })
+
+        app.get('/blogs/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await BlogsCollections.findOne(query)
+            res.send(result)
+        })
+
+        app.patch('/blogs/:id' , async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true }
+            const updateDoc = {
+                $set: req.body
+            }
+            const result = await BlogsCollections.updateOne(filter, updateDoc, options)
+            res.send(result)
+        })
+        app.delete('/blogs/:id' , async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) };
+            const result = await BlogsCollections.deleteOne(filter)
+            res.send(result)
+        })
+
+        // Funding API:
+
+        app.post('/makeAfunding', async (req, res) => {
+            const fundAmount = req.body
+            const result = await FundCollections.insertOne(fundAmount)
+            res.send(result)
+        })
+
+        app.get('/makeAfunding', async (req, res) => {
+            const result = await FundCollections.find().toArray()
+            res.send(result)
+        })
+
+        // PAYMENT GATEWAY API  
+        app.post('/create-payment-intent', async (req, res) => {
+            const { price } = req.body;
+
+            if (!price || price < 0.5) {
+                console.log("tk kom")
+                return res.status(400).send({
+                    error: "Amount must be at least $0.50.",
+                });
+            }
+
+            const amount = parseInt(price * 100);
+
+            try {
+                const paymentIntent = await stripe.paymentIntents.create({
+                    amount: amount,
+                    currency: "usd",
+                    payment_method_types: ["card"],
+                });
+
+                res.send({
+                    clientSecret: paymentIntent.client_secret,
+                });
+            } catch (error) {
+                res.status(401).send({
+                    error: error.message,
+                });
+            }
+        });
 
 
 
