@@ -58,6 +58,18 @@ async function run() {
         app.get('/jwt', async (req, res) => {
             res.send("jwt /jwt working")
         })
+        app.post('/jwtlogout', async (req, res) => {
+            res
+                .clearCookie('token', {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+                })
+                .send({ success: 'cookie cleared' })
+        })
+        app.get('/logout', async (req, res) => {
+            res.send("jwt /logout working")
+        })
 
 
 
