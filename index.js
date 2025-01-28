@@ -141,6 +141,65 @@ async function run() {
         });
 
 
+        app.patch('/users/:id', verifyToken, async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: req.body
+            }
+            const result = await usersCollections.updateOne(filter, updateDoc, options)
+            res.send(result)
+        })
+
+        // Search 
+        app.get('users/search', async (req, res) => {
+            const { group, District, Upazila } = req.query
+            const query = {}
+            if (group) query.group = group
+            if (District) query.District = District
+            if (Upazila) query.Upazila = Upazila
+            const result = await requestCollections.find(query).toArray()
+            res.send(result)
+        })
+
+
+        // Admin Check API 
+        app.get('/users/admin/:email', async (req, res) => {
+            const ReqEmail = req.params?.email
+            console.log(ReqEmail)
+            // if (ReqEmail !== req.user?.email) {
+            //     return res.status(403).send({ message: "forbidden access" })
+            // }
+            const query = { email: ReqEmail }
+            const user = await usersCollections.findOne(query)
+            let admin = false
+            if (user) {
+                admin = user?.role == "admin"
+            }
+            console.log(admin)
+            res.send({ admin })
+        })
+
+        // Volunteer Check
+
+        app.get('/users/mod/volunteer/:email', async (req, res) => {
+            const ReqEmail = req.params?.email
+            // if (ReqEmail !== req.user?.email) {
+            //     return res.status(403).send({ message: "forbidden access" })
+            // }
+            const query = { email: ReqEmail }
+            const user = await usersCollections.findOne(query)
+            let volunteer = false
+            if (user) {
+                volunteer = user?.role == "volunteer"
+            }
+            console.log(volunteer)
+            res.send({ volunteer })
+        })
+
+
+
 
     } finally {
         // Ensures that the client will close when you finish/error
