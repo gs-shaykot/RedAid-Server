@@ -94,6 +94,29 @@ async function run() {
             res.send(result);
         });
 
+        app.get('/users', async (req, res) => {
+            const page = parseInt(req.query.page)
+            const size = parseInt(req.query.size)
+            const email = req.query.email
+            if (email) {
+                const query = { email: email }
+                const userCount = await usersCollections.countDocuments(query)
+                const Alluser = await usersCollections.find(query).skip(page * size).limit(size).toArray()
+                if (Alluser) {
+                    res.send({ Alluser, userCount })
+                }
+                else {
+                    res.status(404).send({ message: "Request not found" })
+                }
+            }
+            else {
+                const userCount = await usersCollections.countDocuments()
+                const result = await usersCollections.find().skip(page * size).limit(size).toArray()
+                // const result = await requestCollections.find().toArray()
+                res.send({ result, userCount })
+            }
+        })
+
 
 
     } finally {
