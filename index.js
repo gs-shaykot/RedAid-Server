@@ -87,6 +87,12 @@ async function run() {
             })
         }
 
+        // User Api:
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const result = await usersCollections.insertOne(user);
+            res.send(result);
+        });
 
 
 
