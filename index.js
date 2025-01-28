@@ -72,6 +72,23 @@ async function run() {
         })
 
 
+        // TOKEN VERIFIER
+        const verifyToken = (req, res, next) => {
+            const token = req?.cookies?.token
+            if (!token) {
+                return res.status(401).send({ message: 'Token not found to verify' })
+            }
+            jwt.verify(token, process.env.jwt_Secret, (err, decoded) => {
+                if (err) {
+                    return res.status(401).send({ message: 'Unauthorization Error' })
+                }
+                req.user = decoded
+                next()
+            })
+        }
+
+
+
 
     } finally {
         // Ensures that the client will close when you finish/error
