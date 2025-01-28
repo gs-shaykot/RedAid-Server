@@ -42,6 +42,25 @@ async function run() {
         const BlogsCollections = client.db("RedAid").collection('blogs');
         const FundCollections = client.db("RedAid").collection('fundings');
 
+        app.post('/jwt', async (req, res) => {
+            const user = req.body
+            const token = jwt.sign(user, process.env.jwt_Secret, {
+                expiresIn: '1h'
+            })
+            res
+                .cookie('token', token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+                })
+                .send({ success: 'cookie created' })
+        })
+        app.get('/jwt', async (req, res) => {
+            res.send("jwt /jwt working")
+        })
+
+
+
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
