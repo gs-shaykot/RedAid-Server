@@ -198,6 +198,36 @@ async function run() {
             res.send({ volunteer })
         })
 
+        // Donation Request API's:
+
+
+        app.post('/requests', verifyToken, async (req, res) => {
+            const request = req.body
+            const result = await requestCollections.insertOne(request)
+            res.send(result)
+        })
+        app.get('/requests', async (req, res) => {
+            const page = parseInt(req.query.page)
+            const size = parseInt(req.query.size)
+            const email = req.query.email
+            if (email) {
+                const query = { requesterEmail: email }
+                const rqstCount = await requestCollections.countDocuments(query)
+                const userReq = await requestCollections.find(query).skip(page * size).limit(size).toArray()
+                if (userReq) {
+                    res.send({ userReq, rqstCount })
+                }
+                else {
+                    res.status(404).send({ message: "Request not found" })
+                }
+            }
+            else {
+                const totalCount = await requestCollections.countDocuments()
+                const result = await requestCollections.find().skip(page * size).limit(size).toArray()
+                // const result = await requestCollections.find().toArray()
+                res.send({ result, totalCount })
+            }
+        })
 
 
 
