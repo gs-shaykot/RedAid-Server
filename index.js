@@ -228,6 +228,50 @@ async function run() {
                 res.send({ result, totalCount })
             }
         })
+        app.get('/requests/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await requestCollections.findOne(query)
+            res.send(result)
+        })
+
+        app.get('/requests/sorted/ascending', verifyToken, async (req, res) => {
+            const email = req.query.email
+            if (email) {
+                const query = { requesterEmail: email };
+                const cursor = requestCollections.find(query).sort({ createdDate: -1 }).limit(3);
+                const result = await cursor.toArray();
+                if (result) {
+                    res.send(result);
+                }
+                else {
+                    res.status(404).send({ message: "Request not found" })
+                }
+            }
+            else {
+                const cursor = requestCollections.find().sort({ createdDate: 1 });
+                const result = await cursor.toArray();
+                res.send(result);
+            }
+        });
+
+        app.patch('/requests/:id', verifyToken, async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true }
+            const updateDoc = {
+                $set: req.body
+            }
+            const result = await requestCollections.updateOne(filter, updateDoc, options)
+            res.send(result)
+        })
+
+        app.delete('/requests/:id', verifyToken, async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) };
+            const result = await requestCollections.deleteOne(filter)
+            res.send(result)
+        })
 
 
 
