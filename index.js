@@ -135,7 +135,6 @@ async function run() {
                 ...(District && { District }),
                 ...(Upazila && { Upazila }),
             };
-            console.log(blood, " ", District, " ", Upazila)
             const result = await usersCollections.find(query).toArray();
             res.send(result);
         });
@@ -167,7 +166,6 @@ async function run() {
         // Admin Check API 
         app.get('/users/admin/:email', async (req, res) => {
             const ReqEmail = req.params?.email
-            console.log(ReqEmail)
             // if (ReqEmail !== req.user?.email) {
             //     return res.status(403).send({ message: "forbidden access" })
             // }
@@ -177,7 +175,6 @@ async function run() {
             if (user) {
                 admin = user?.role == "admin"
             }
-            console.log(admin)
             res.send({ admin })
         })
 
@@ -194,7 +191,6 @@ async function run() {
             if (user) {
                 volunteer = user?.role == "volunteer"
             }
-            console.log(volunteer)
             res.send({ volunteer })
         })
 
@@ -228,6 +224,16 @@ async function run() {
                 res.send({ result, totalCount })
             }
         })
+        app.get('/requests/pending', async (req, res) => {
+            const page = parseInt(req.query.page)
+            const size = parseInt(req.query.size)
+            const query = { donationStatus: 'pending' }
+            const totalCount = await requestCollections.countDocuments(query)
+            const result = await requestCollections.find(query).skip(page * size).limit(size).toArray()
+            // const result = await requestCollections.find().toArray()
+            res.send({ result, totalCount })
+        })
+
         app.get('/requests/:id', async (req, res) => {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
@@ -298,7 +304,7 @@ async function run() {
                 res.send(result)
             }
         })
- 
+
 
         app.patch('/donar/:id', verifyToken, async (req, res) => {
             const id = req.params.id
@@ -341,7 +347,7 @@ async function run() {
             res.send(result)
         })
 
-        app.patch('/blogs/:id' , async (req, res) => {
+        app.patch('/blogs/:id', async (req, res) => {
             const id = req.params.id
             const filter = { _id: new ObjectId(id) }
             const options = { upsert: true }
@@ -351,7 +357,7 @@ async function run() {
             const result = await BlogsCollections.updateOne(filter, updateDoc, options)
             res.send(result)
         })
-        app.delete('/blogs/:id' , async (req, res) => {
+        app.delete('/blogs/:id', async (req, res) => {
             const id = req.params.id
             const filter = { _id: new ObjectId(id) };
             const result = await BlogsCollections.deleteOne(filter)
@@ -376,7 +382,6 @@ async function run() {
             const { price } = req.body;
 
             if (!price || price < 0.5) {
-                console.log("tk kom")
                 return res.status(400).send({
                     error: "Amount must be at least $0.50.",
                 });
