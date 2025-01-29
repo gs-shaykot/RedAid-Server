@@ -224,7 +224,7 @@ async function run() {
                 res.send({ result, totalCount })
             }
         })
-        app.get('/requests/pending', async (req, res) => {
+        app.get('/requests/all/stats/pending', async (req, res) => {
             const page = parseInt(req.query.page)
             const size = parseInt(req.query.size)
             const query = { donationStatus: 'pending' }
@@ -290,7 +290,7 @@ async function run() {
             const email = req.query.email;
             if (email) {
                 const query = { DonorEmail: email }
-                const cursor = await DonarsCollections.find(query).sort({ respondedAt: 1 }).limit(3)
+                const cursor = await DonarsCollections.find(query).sort({ respondedAt: 1 }) 
                 const result = await cursor.toArray()
                 if (result) {
                     res.send(result);
