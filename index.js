@@ -41,6 +41,7 @@ async function run() {
         const DonarsCollections = client.db("RedAid").collection('donars');
         const BlogsCollections = client.db("RedAid").collection('blogs');
         const FundCollections = client.db("RedAid").collection('fundings');
+        const BankCollections = client.db("RedAid").collection('bloodBanks');
 
         app.post('/jwt', async (req, res) => {
             const user = req.body
@@ -128,6 +129,7 @@ async function run() {
             }
         })
 
+        // Search 
         app.get('/users/search', async (req, res) => {
             const { blood, District, Upazila } = req.query;
             const query = {
@@ -151,16 +153,15 @@ async function run() {
             res.send(result)
         })
 
-        // Search 
-        app.get('users/search', async (req, res) => {
-            const { group, District, Upazila } = req.query
-            const query = {}
-            if (group) query.group = group
-            if (District) query.District = District
-            if (Upazila) query.Upazila = Upazila
-            const result = await requestCollections.find(query).toArray()
-            res.send(result)
-        })
+        // app.get('users/search', async (req, res) => {
+        //     const { group, District, Upazila } = req.query
+        //     const query = {}
+        //     if (group) query.group = group
+        //     if (District) query.District = District
+        //     if (Upazila) query.Upazila = Upazila
+        //     const result = await requestCollections.find(query).toArray()
+        //     res.send(result)
+        // })
 
 
         // Admin Check API 
@@ -290,7 +291,7 @@ async function run() {
             const email = req.query.email;
             if (email) {
                 const query = { DonorEmail: email }
-                const cursor = await DonarsCollections.find(query).sort({ respondedAt: 1 }) 
+                const cursor = await DonarsCollections.find(query).sort({ respondedAt: 1 })
                 const result = await cursor.toArray()
                 if (result) {
                     res.send(result);
@@ -404,6 +405,23 @@ async function run() {
                     error: error.message,
                 });
             }
+        });
+
+        // Blood Bank
+        // app.get('/bloodBanks', async (req, res) => {
+        //     const result = await BankCollections.find().toArray()
+        //     res.send(result)
+        // })
+        // modify this 
+        app.get('/bloodBanks', async (req, res) => {
+            const { division, district } = req.query; // Use lowercase 
+
+            const query = {};
+            if (division) query.division = division;
+            if (district) query.district = district;
+
+            const result = await BankCollections.find(query).toArray();
+            res.send(result);
         });
 
 
